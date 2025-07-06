@@ -1,0 +1,12 @@
+{
+  "name": "monorepo-vue-fastify",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev:client": "pnpm --filter client dev",
+    "dev:server": "pnpm --filter server dev:server"
+  },
+  "devDependencies": {
+    "typescript": "~5.8.0"
+  }
+}
