@@ -1,7 +1,6 @@
-import { get } from "http";
 import { router, publicProcedure } from "./trpc";
 import { z } from "zod";
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 
 interface StoreItem {
   id: string;
@@ -9,7 +8,7 @@ interface StoreItem {
   price: number;
 }
 
-const sampleStoreItemDB: StoreItem[] = [
+let sampleStoreItemDB: StoreItem[] = [
   {
     id: "1",
     name: "Sample Item 1",
@@ -127,19 +126,55 @@ export const appRouter = router({
       return item;
     }),
 
-  createStoreItem: publicProcedure.input(z.object({ name: z.string(), price: z.number() })).mutation(({ input }) => {
-    const generatedId = uuidv4();
+  createStoreItem: publicProcedure
+    .input(z.object({ name: z.string(), price: z.number() }))
+    .mutation(({ input }) => {
+      const generatedId = uuidv4();
 
-    const newItem = {
-      id: generatedId,
-      name: input.name,
-      price: input.price,
-    };
+      const newItem = {
+        id: generatedId,
+        name: input.name,
+        price: input.price,
+      };
 
-    sampleStoreItemDB.push(newItem);
+      sampleStoreItemDB.push(newItem);
 
-    return newItem;
-  }),
+      return newItem;
+    }),
+
+  updateStoreItem: publicProcedure
+    .input(z.object({ id: z.string(), name: z.string(), price: z.number() }))
+    .mutation(({ input }) => {
+      const item = sampleStoreItemDB.findIndex((item) => item.id === input.id);
+
+      if (item === -1) {
+        throw new Error("Item not found");
+      }
+
+      const updatedItem = (sampleStoreItemDB[item] = {
+        id: input.id,
+        name: input.name,
+        price: input.price,
+      });
+
+      return updatedItem;
+    }),
+
+  deleteStoreItem: publicProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(({ input }) => {
+      const itemIndex = sampleStoreItemDB.findIndex(
+        (item) => item.id === input.id
+      );
+
+      if (itemIndex === -1) {
+        throw new Error("Item not found");
+      }
+
+      sampleStoreItemDB.splice(itemIndex, 1);
+
+      return { success: true, id: input.id };
+    }),
 });
 
 export type AppRouter = typeof appRouter;
