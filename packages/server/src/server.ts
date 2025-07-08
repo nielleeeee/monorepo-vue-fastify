@@ -8,10 +8,9 @@ const server = Fastify({
 });
 
 await server.register(cors, {
-  origin: "*", // Adjust for production
+  origin: "*", 
 });
 
-// Register the tRPC plugin
 await server.register(fastifyTRPCPlugin, {
   prefix: "/trpc",
   trpcOptions: { router: appRouter },
