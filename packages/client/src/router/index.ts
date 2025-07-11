@@ -29,10 +29,10 @@ const router = createRouter({
       props: true,
     },
     {
-      path: '/form',
-      name: 'form',
-      component: () => import('../views/FormView.vue'),
-    }
+      path: '/create',
+      name: 'create',
+      component: () => import('../views/CreateItemVew.vue'),
+    },
   ],
 })
 
