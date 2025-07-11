@@ -48,7 +48,8 @@ const emit = defineEmits(['close'])
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid #ddd;
+  color: #2b2b2b;
+  border-bottom: 1px solid #2b2b2b;
   padding-bottom: 1rem;
   margin-bottom: 1rem;
 }
