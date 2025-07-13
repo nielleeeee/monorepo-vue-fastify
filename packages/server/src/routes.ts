@@ -1,180 +1,134 @@
 import { router, publicProcedure } from "./trpc";
 import { z } from "zod";
-import { v4 as uuidv4 } from "uuid";
+import { db } from "./db";
 
 interface StoreItem {
-  id: string;
-  name: string;
-  price: number;
+    id: string;
+    name: string;
+    price: number;
 }
 
-let sampleStoreItemDB: StoreItem[] = [
-  {
-    id: "1",
-    name: "Sample Item 1",
-    price: 100,
-  },
-  {
-    id: "2",
-    name: "Sample Item 2",
-    price: 200,
-  },
-  {
-    id: "3",
-    name: "Sample Item 3",
-    price: 300,
-  },
-  {
-    id: "4",
-    name: "Sample Item 4",
-    price: 400,
-  },
-  {
-    id: "5",
-    name: "Sample Item 5",
-    price: 500,
-  },
-];
-
 export const appRouter = router({
-  hello: publicProcedure.query(() => {
-    return "Hello from tRPC!";
-  }),
-
-  greet: publicProcedure
-    .input(z.object({ name: z.string() }))
-    .query(({ input }) => {
-      return {
-        greeting: `Greetings, ${input.name}!`,
-      };
+    hello: publicProcedure.query(() => {
+        return "Hello from tRPC!";
     }),
 
-  getStoreItems: publicProcedure
-    .input(
-      z.object({
-        limit: z.number().optional(),
-        cursor: z.string().optional(),
-        search: z.string().optional(),
-        sortBy: z.enum(["name", "price"]).optional(),
-        sortOrder: z.enum(["asc", "desc"]).optional(),
-      })
-    )
-    .query(({ input }) => {
-      const { limit = 10, cursor, search, sortBy, sortOrder } = input;
-      let items = sampleStoreItemDB;
+    greet: publicProcedure
+        .input(z.object({ name: z.string() }))
+        .query(({ input }) => {
+            return {
+                greeting: `Greetings, ${input.name}!`,
+            };
+        }),
 
-      if (search) {
-        items = items.filter((item) => item.name.includes(search));
-      }
+    getStoreItems: publicProcedure
+        .input(
+            z.object({
+                limit: z.number().optional(),
+                cursor: z.string().optional(),
+                search: z.string().optional(),
+                sortBy: z.enum(["name", "price"]).optional(),
+                sortOrder: z.enum(["asc", "desc"]).optional(),
+            })
+        )
+        .query(async ({ input }) => {
+            const {
+                limit = 10,
+                cursor,
+                search,
+                sortBy = "name",
+                sortOrder = "asc",
+            } = input;
+            let query = db
+                .collection("storeItem")
+                .orderBy(sortBy, sortOrder)
+                .limit(limit);
+            // Will do the search / Sort by / Sort Order later on
 
-      if (sortBy && sortOrder) {
-        items = items.sort((a, b) => {
-          if (sortBy === "name") {
-            if (sortOrder === "asc") {
-              return a.name.localeCompare(b.name);
-            } else {
-              return b.name.localeCompare(a.name);
+            if (cursor) {
+                const cursorDoc = await db
+                    .collection("storeItem")
+                    .doc(cursor)
+                    .get();
+
+                if (cursorDoc.exists) {
+                    query = query.startAfter(cursorDoc);
+                }
             }
-          } else if (sortBy === "price") {
-            if (sortOrder === "asc") {
-              return a.price - b.price;
-            } else {
-              return b.price - a.price;
+
+            const snapshot = await query.get();
+
+            const items = snapshot.docs.map((doc) => {
+                return { id: doc.id, ...doc.data() };
+            }) as StoreItem[];
+
+            let nextCursor: string | undefined;
+
+            if (snapshot.docs.length === limit) {
+                const lastDoc = snapshot.docs[snapshot.docs.length - 1];
+                nextCursor = lastDoc.id;
             }
-          }
 
-          return 0;
-        });
-      }
+            return { items, nextCursor };
+        }),
 
-      let start = 0;
-      if (cursor) {
-        const index = items.findIndex((item) => item.id === cursor);
+    getStoreItemById: publicProcedure
+        .input(z.object({ id: z.string() }))
+        .query(async ({ input }) => {
+            console.log("getStoreItemById", input);
 
-        if (index !== -1) {
-          start = index + 1;
-        }
-      }
+            const docRef = db.collection("storeItem").doc(input.id);
 
-      const paginatedItems = items.slice(start, start + limit);
+            const doc = await docRef.get();
 
-      let nextCursor: string | undefined;
+            if (!doc.exists) {
+                console.error("Error fetching item Data:", doc);
+                console.error("Error fetching item ID:", doc.id);
+                throw new Error("Item not found");
+            }
 
-      if (paginatedItems.length === limit) {
-        const lastItem = paginatedItems[paginatedItems.length - 1];
+            const resItem = { id: doc.id, ...doc.data() };
 
-        if (lastItem && items[start + limit]) {
-          nextCursor = lastItem.id;
-        }
-      }
+            return resItem;
+        }),
 
-      return {
-        items: paginatedItems,
-        nextCursor,
-      };
-    }),
+    createStoreItem: publicProcedure
+        .input(z.object({ name: z.string(), price: z.number() }))
+        .mutation(async ({ input }) => {
+            const newItem = {
+                name: input.name,
+                price: input.price,
+            };
 
-  getStoreItemById: publicProcedure
-    .input(z.object({ id: z.string() }))
-    .query(({ input }) => {
-      const item = sampleStoreItemDB.find((item) => item.id === input.id);
+            const docRef = await db.collection("storeItem").add(newItem);
 
-      if (!item) {
-        return null;
-      }
+            return { id: docRef.id, ...newItem };
+        }),
 
-      return item;
-    }),
+    updateStoreItem: publicProcedure
+        .input(
+            z.object({ id: z.string(), name: z.string(), price: z.number() })
+        )
+        .mutation(async ({ input }) => {
+            const docRef = db.collection("storeItem").doc(input.id);
 
-  createStoreItem: publicProcedure
-    .input(z.object({ name: z.string(), price: z.number() }))
-    .mutation(({ input }) => {
-      const generatedId = uuidv4();
+            const newItem = {
+                name: input.name,
+                price: input.price,
+            };
 
-      const newItem = {
-        id: generatedId,
-        name: input.name,
-        price: input.price,
-      };
+            await docRef.update(newItem);
 
-      sampleStoreItemDB.push(newItem);
+            return { id: docRef.id, ...newItem };
+        }),
 
-      return newItem;
-    }),
+    deleteStoreItem: publicProcedure
+        .input(z.object({ id: z.string() }))
+        .mutation(async ({ input }) => {
+            const docRef = db.collection("storeItem").doc(input.id);
 
-  updateStoreItem: publicProcedure
-    .input(z.object({ id: z.string(), name: z.string(), price: z.number() }))
-    .mutation(({ input }) => {
-      const item = sampleStoreItemDB.findIndex((item) => item.id === input.id);
-
-      if (item === -1) {
-        throw new Error("Item not found");
-      }
-
-      const updatedItem = (sampleStoreItemDB[item] = {
-        id: input.id,
-        name: input.name,
-        price: input.price,
-      });
-
-      return updatedItem;
-    }),
-
-  deleteStoreItem: publicProcedure
-    .input(z.object({ id: z.string() }))
-    .mutation(({ input }) => {
-      const itemIndex = sampleStoreItemDB.findIndex(
-        (item) => item.id === input.id
-      );
-
-      if (itemIndex === -1) {
-        throw new Error("Item not found");
-      }
-
-      sampleStoreItemDB.splice(itemIndex, 1);
-
-      return { success: true, id: input.id };
-    }),
+            return await docRef.delete();
+        }),
 });
 
 export type AppRouter = typeof appRouter;
