@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "dev:client": "pnpm --filter client dev",
-    "dev:server": "pnpm --filter server dev:server"
+    "dev:server": "pnpm --filter server dev:server",
+    "dev:workflow": "pnpm --filter workflow dev"
   },
   "devDependencies": {
     "typescript": "~5.8.0"
