@@ -3,9 +3,7 @@ import cors from "@fastify/cors";
 import { fastifyTRPCPlugin } from "@trpc/server/adapters/fastify";
 import { appRouter } from "./routes";
 
-const server = Fastify({
-  logger: true,
-});
+const server = Fastify();
 
 await server.register(cors, {
   origin: "*", 
