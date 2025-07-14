@@ -33,6 +33,11 @@ const router = createRouter({
       name: 'create',
       component: () => import('../views/CreateItemVew.vue'),
     },
+    {
+      path: '/workflow',
+      name: 'workflow',
+      component: () => import('../views/WorkflowView.vue'),
+    },
   ],
 })
 
