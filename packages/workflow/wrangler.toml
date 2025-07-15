@@ -1,0 +1,8 @@
+name = "workflow"
+main = "src/index.ts"
+compatibility_date = "2025-07-14"
+
+[[workflows]]
+name = "test-workflow"
+binding = "TEST_WORKFLOW"
+class_name = "TestWorkflow"
