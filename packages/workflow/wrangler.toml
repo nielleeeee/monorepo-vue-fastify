@@ -1,6 +1,7 @@
 name = "workflow"
 main = "src/index.ts"
-compatibility_date = "2025-07-14"
+compatibility_date = "2025-07-09"
+compatibility_flags = [ "nodejs_compat" ]
 
 [[workflows]]
 name = "test-workflow"
@@ -11,3 +12,8 @@ class_name = "TestWorkflow"
 name = "test-email-workflow"
 binding = "TEST_EMAIL_WORKFLOW"
 class_name = "TestEmailWorkflow"
+
+[[workflows]]
+name = "test-sms-workflow"
+binding = "TEST_SMS_WORKFLOW"
+class_name = "TestSMSWorkflow"
