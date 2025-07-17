@@ -38,6 +38,11 @@ const router = createRouter({
       name: 'workflow',
       component: () => import('../views/WorkflowView.vue'),
     },
+    {
+      path: '/email-workflow',
+      name: 'email-workflow',
+      component: () => import('../views/EmailWorkflowView.vue'),
+    },
   ],
 })
 
