@@ -3,8 +3,9 @@ import { logger } from "hono/logger";
 import { poweredBy } from "hono/powered-by";
 import { cors } from "hono/cors";
 import { authMiddleware } from "./middleware";
-import { Params, WorkflowResponse } from "./types";
+import { EmailParams, Params, WorkflowResponse } from "./types";
 import { TestWorkflow } from "./workflow/sampleWorkflow";
+import { TestEmailWorkflow } from "./workflow/emailWorkflow";
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -84,7 +85,42 @@ app.get("/test-workflow/:id", authMiddleware, async (context) => {
     }
 });
 
-export { TestWorkflow };
+app.post("/test-workflow-email", authMiddleware, async (context) => {
+    try {
+        const body = await context.req.json<EmailParams>();
+        const { email, name, text } = body;
+
+        if (!email || !name || !text) {
+            return context.json(
+                { success: false, message: "Missing body" },
+                400
+            );
+        }
+
+        let workflow = context.env.TEST_EMAIL_WORKFLOW;
+
+        const workflowCreate = await workflow.create({
+            id: "workflow-run-" + crypto.randomUUID(),
+            params: body,
+        });
+
+        return context.json({
+            success: true,
+            message: "Workflow Email started",
+            id: workflowCreate.id,
+        });
+
+        
+    } catch (error) {
+        console.error("error sending email", error);
+        return context.json(
+            { success: false, message: "Failed to send email" },
+            500
+        );
+    }
+});
+
+export { TestWorkflow, TestEmailWorkflow };
 
 export default {
     fetch: app.fetch,
