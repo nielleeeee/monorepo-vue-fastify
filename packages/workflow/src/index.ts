@@ -3,9 +3,10 @@ import { logger } from "hono/logger";
 import { poweredBy } from "hono/powered-by";
 import { cors } from "hono/cors";
 import { authMiddleware } from "./middleware";
-import { EmailParams, Params, WorkflowResponse } from "./types";
+import { EmailParams, Params, SMSParams } from "./types";
 import { TestWorkflow } from "./workflow/sampleWorkflow";
 import { TestEmailWorkflow } from "./workflow/emailWorkflow";
+import { TestSMSWorkflow } from "./workflow/smsWorkflow";
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -109,8 +110,6 @@ app.post("/test-workflow-email", authMiddleware, async (context) => {
             message: "Workflow Email started",
             id: workflowCreate.id,
         });
-
-        
     } catch (error) {
         console.error("error sending email", error);
         return context.json(
@@ -120,7 +119,41 @@ app.post("/test-workflow-email", authMiddleware, async (context) => {
     }
 });
 
-export { TestWorkflow, TestEmailWorkflow };
+app.post("/test-workflow-sms", authMiddleware, async (context) => {
+    try {
+        const body = await context.req.json<SMSParams>();
+        const { phone, name, text } = body;
+
+        if (!phone || !name || !text) {
+            return context.json(
+                { success: false, message: "Missing body" },
+                400
+            );
+        }
+
+        let workflow = context.env.TEST_SMS_WORKFLOW;
+        console.log("SMS Body: ", body);
+
+        const workflowCreate = await workflow.create({
+            id: "workflow-run-" + crypto.randomUUID(),
+            params: body,
+        });
+
+        return context.json({
+            success: true,
+            message: "Workflow SMS started",
+            id: workflowCreate.id,
+        });
+    } catch (error) {
+        console.error("error sending sms", error);
+        return context.json(
+            { success: false, message: "Failed to send sms" },
+            500
+        );
+    }
+});
+
+export { TestWorkflow, TestEmailWorkflow, TestSMSWorkflow };
 
 export default {
     fetch: app.fetch,
