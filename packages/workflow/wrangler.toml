@@ -6,3 +6,8 @@ compatibility_date = "2025-07-14"
 name = "test-workflow"
 binding = "TEST_WORKFLOW"
 class_name = "TestWorkflow"
+
+[[workflows]]
+name = "test-email-workflow"
+binding = "TEST_EMAIL_WORKFLOW"
+class_name = "TestEmailWorkflow"
