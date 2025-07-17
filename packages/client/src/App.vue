@@ -16,6 +16,7 @@ import HelloWorld from './components/HelloWorld.vue'
         <RouterLink to="/shop">Shop</RouterLink>
         <RouterLink to="/create">Create</RouterLink>
         <RouterLink to="/workflow">Workflow</RouterLink>
+        <RouterLink to="/email-workflow">Email Workflow</RouterLink>
         
       </nav>
     </div>
