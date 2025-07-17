@@ -4,6 +4,8 @@
 declare namespace Cloudflare {
 	interface Env {
 		TEST_WORKFLOW: Workflow;
+        TEST_EMAIL_WORKFLOW: Workflow;
+        RESEND_API_KEY: string;
 	}
 }
 interface Env extends Cloudflare.Env {}
