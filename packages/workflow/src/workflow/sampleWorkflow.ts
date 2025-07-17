@@ -5,10 +5,6 @@ import {
 } from "cloudflare:workers";
 import { Params } from "../types";
 
-type Env = {
-    TEST_WORKFLOW: Workflow;
-};
-
 export class TestWorkflow extends WorkflowEntrypoint<Env, Params> {
     async run(event: WorkflowEvent<Params>, step: WorkflowStep) {
         const { env } = this;
