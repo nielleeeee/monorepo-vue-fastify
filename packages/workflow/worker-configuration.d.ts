@@ -5,7 +5,11 @@ declare namespace Cloudflare {
 	interface Env {
 		TEST_WORKFLOW: Workflow;
         TEST_EMAIL_WORKFLOW: Workflow;
+        TEST_SMS_WORKFLOW: Workflow;
         RESEND_API_KEY: string;
+        TWILIO_ACCOUNT_SID: string;
+        TWILIO_AUTH_TOKEN: string;
+        TWILIO_VERIFY_SERVICE_SID: string;
 	}
 }
 interface Env extends Cloudflare.Env {}
