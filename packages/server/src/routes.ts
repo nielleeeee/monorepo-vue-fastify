@@ -43,7 +43,12 @@ export const appRouter = router({
                 .collection("storeItem")
                 .orderBy(sortBy, sortOrder)
                 .limit(limit);
-            // Will do the search / Sort by / Sort Order later on
+
+            if (search && sortBy === "name") {
+                query = query
+                    .where("name", ">=", search)
+                    .where("name", "<=", search + "\uf8ff");
+            }
 
             if (cursor) {
                 const cursorDoc = await db
@@ -87,7 +92,7 @@ export const appRouter = router({
                 throw new Error("Item not found");
             }
 
-            const resItem = { id: doc.id, ...doc.data() };
+            const resItem = { id: doc.id, ...doc.data() } as StoreItem;
 
             return resItem;
         }),
@@ -102,7 +107,7 @@ export const appRouter = router({
 
             const docRef = await db.collection("storeItem").add(newItem);
 
-            return { id: docRef.id, ...newItem };
+            return { id: docRef.id, ...newItem } as StoreItem;
         }),
 
     updateStoreItem: publicProcedure
@@ -110,24 +115,24 @@ export const appRouter = router({
             z.object({ id: z.string(), name: z.string(), price: z.number() })
         )
         .mutation(async ({ input }) => {
-            const docRef = db.collection("storeItem").doc(input.id);
-
             const newItem = {
                 name: input.name,
                 price: input.price,
             };
 
+            const docRef = db.collection("storeItem").doc(input.id);
+
             await docRef.update(newItem);
 
-            return { id: docRef.id, ...newItem };
+            return { id: docRef.id, ...newItem } as StoreItem;
         }),
 
     deleteStoreItem: publicProcedure
         .input(z.object({ id: z.string() }))
         .mutation(async ({ input }) => {
-            const docRef = db.collection("storeItem").doc(input.id);
+            await db.collection("storeItem").doc(input.id).delete();
 
-            return await docRef.delete();
+            return { success: true, id: input.id };
         }),
 });
 
