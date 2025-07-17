@@ -14,3 +14,10 @@ export interface WorkflowStatus extends WorkflowResponse {
         output?: any;
     };
 }
+
+export interface EmailParams {
+    email: string;
+    name: string;
+    subject?: string;
+    text: string;
+}
