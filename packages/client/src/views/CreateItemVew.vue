@@ -20,18 +20,18 @@ const handleCreateItem = async () => {
   try {
     console.log('Item to be added: ', formState)
 
-    setStoreItems({
-      id: Math.random().toString(),
-      name: formState.name,
-      price: formState.price,
-    })
-
     // Save Item to DB
     const result = await trpc.createStoreItem.mutate({
       name: formState.name,
       price: formState.price,
     })
 
+    setStoreItems({
+      id: result.id,
+      name: result.name,
+      price: result.price,
+    })
+    
     console.log('Store Item: ', storeItem)
   } catch (error) {
     console.error('Error creating item:', error)
