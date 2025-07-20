@@ -1,0 +1,55 @@
+# Define variables for the host and authentication token for easy reuse.
+@hostname = http://localhost:8787
+@token = sample-token
+
+###
+# 1. Trigger the main sample workflow
+# @name triggerSampleWorkflow
+POST {{hostname}}/test-workflow
+Content-Type: application/json
+token: {{token}}
+
+{
+  "name": "Sample Name",
+  "subject": "Sample Workflow Email",
+  "email": "jandnllplz@gmail.com",
+  "phone": "+639776996964",
+  "emailMessage": "This is the email body",
+  "smsMessage": "This is the SMS body"
+}
+
+###
+# 2. Check the status of a specific workflow instance
+# Note: Replace 'workflow-run-sample_id' with a real ID from the trigger response.
+# @name checkWorkflowStatus
+GET {{hostname}}/test-workflow/workflow-run-sample_id
+token: {{token}}
+
+
+###
+# 3. Trigger the SMS workflow
+# @name triggerSmsWorkflow
+POST {{hostname}}/test-workflow-sms
+Content-Type: application/json
+token: {{token}}
+
+{
+  "phone": "+639776996964",
+  "text": "Hello from your workflow!",
+  "name": "John Doe"
+}
+
+
+###
+# 4. Trigger the Email workflow
+# @name triggerEmailWorkflow
+POST {{hostname}}/test-workflow-email
+Content-Type: application/json
+token: {{token}}
+
+{
+  "email": "jandnllplz@gmail.com",
+  "name": "John Doe",
+  "subject": "Hello from Workflow",
+  "text": "This is the body of the email."
+}
