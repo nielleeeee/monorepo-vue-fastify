@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { reactive, computed, watch, ref, onMounted } from 'vue'
-import { storeToRefs } from 'pinia'
+import { reactive, computed, watch, ref } from 'vue'
 import { useStoreItem } from '@/stores/storeItem'
 import BaseModal from '@/components/BaseModal.vue'
 import { trpc } from '@/trpc'
@@ -18,7 +17,6 @@ const formState = reactive({
 })
 
 const store = useStoreItem()
-const { storeItem } = storeToRefs(store)
 const { editStoreItem, deleteStoreItem } = store
 const isOpen = ref(false)
 const isOpenDelete = ref(false)
