@@ -1,23 +1,45 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
-import { useStoreItem } from '@/stores/storeItem'
+import { trpc } from '@/trpc'
 import type { Item } from '@/types/itemType'
 
-import StoreCard from '@/components/StoreCard.vue';
+import StoreCard from '@/components/StoreCard.vue'
 
-const storeItem = useStoreItem()
-const items = storeItem.storeItem
+const storeItemDB = ref<Item[]>([])
+const isLoading = ref(false)
 
-const sampleItems = ref<Item[]>(items)
+const sampleFetchItems = async () => {
+  isLoading.value = true
+
+  try {
+    const items = await trpc.getStoreItems.query({})
+
+    console.log('Fetched items:', items)
+
+    return items.items
+  } catch (error) {
+    console.error('Error fetching items:', error)
+
+    return []
+  } finally {
+    isLoading.value = false
+  }
+}
+
+onMounted(async () => {
+  storeItemDB.value = await sampleFetchItems()
+})
 </script>
 
 <template>
   <section>
     <h1>Shop View</h1>
 
-    <ul>
-      <li v-for="item in sampleItems" :key="item.id">
+    <p v-if="isLoading">Loading...</p>
+    
+    <ul v-if="!isLoading">
+      <li v-for="item in storeItemDB" :key="item.id">
         <RouterLink :to="{ name: 'shop-id', params: { id: item.id } }">
           <StoreCard :name="item.name" :price="item.price" />
         </RouterLink>
