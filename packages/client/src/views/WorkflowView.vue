@@ -5,7 +5,10 @@ const SAMPLE_TOKEN = 'sample-token'
 const isLoading = ref(false)
 const startWorkflowFormState = reactive({
   name: '',
+  email: '',
+  phone: '',
 })
+
 const checkWorkflowFormState = reactive({
   id: '',
 })
@@ -20,9 +23,7 @@ const handleStartWorkflow = async () => {
         'Content-Type': 'application/json',
         token: SAMPLE_TOKEN,
       },
-      body: JSON.stringify({
-        name: startWorkflowFormState.name,
-      }),
+      body: JSON.stringify(startWorkflowFormState),
     })
 
     if (!workflowCreateResponse.ok) {
@@ -66,10 +67,22 @@ const handleCheckWorkflow = async () => {
 </script>
 
 <template>
-  <div>
+  <div class="workflow-view">
     <form @submit.prevent="handleStartWorkflow">
-      <label for="name">Name</label>
-      <input type="text" id="name" name="name" v-model="startWorkflowFormState.name" />
+      <div>
+        <label for="name">Name</label>
+        <input type="text" id="name" name="name" v-model="startWorkflowFormState.name" />
+      </div>
+
+      <div>
+        <label for="email">Email</label>
+        <input type="text" id="email" name="email" v-model="startWorkflowFormState.email" />
+      </div>
+
+      <div>
+        <label for="phone">Phone</label>
+        <input type="text" id="phone" name="phone" v-model="startWorkflowFormState.phone" />
+      </div>
 
       <button type="submit">Start Workflow</button>
     </form>
@@ -83,4 +96,29 @@ const handleCheckWorkflow = async () => {
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.workflow-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4rem;
+  padding: 2rem;
+}
+
+.workflow-view form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.workflow-view form div {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+</style>
