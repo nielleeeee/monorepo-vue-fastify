@@ -3,7 +3,7 @@ import { logger } from "hono/logger";
 import { poweredBy } from "hono/powered-by";
 import { cors } from "hono/cors";
 import { authMiddleware } from "./middleware";
-import { EmailParams, Params, SMSParams } from "./types";
+import { SampleWorkflowParams, EmailParams, SMSParams } from "./types";
 import { TestWorkflow } from "./workflow/sampleWorkflow";
 import { TestEmailWorkflow } from "./workflow/emailWorkflow";
 import { TestSMSWorkflow } from "./workflow/smsWorkflow";
@@ -26,11 +26,13 @@ app.get("/", (c) => {
 
 app.post("/test-workflow", authMiddleware, async (context) => {
     try {
-        const body = await context.req.json<Params>();
+        const body = await context.req.json<SampleWorkflowParams>();
+        const { name, email, phone } =
+            body;
 
-        if (!body || !body.name) {
+        if (!name || !email || !phone) {
             return context.json(
-                { success: false, message: "Missing body" },
+                { success: false, message: "Missing Required body" },
                 400
             );
         }
@@ -89,9 +91,9 @@ app.get("/test-workflow/:id", authMiddleware, async (context) => {
 app.post("/test-workflow-email", authMiddleware, async (context) => {
     try {
         const body = await context.req.json<EmailParams>();
-        const { email, name, text } = body;
+        const { email, name, emailMessage } = body;
 
-        if (!email || !name || !text) {
+        if (!email || !name || !emailMessage) {
             return context.json(
                 { success: false, message: "Missing body" },
                 400
@@ -122,9 +124,9 @@ app.post("/test-workflow-email", authMiddleware, async (context) => {
 app.post("/test-workflow-sms", authMiddleware, async (context) => {
     try {
         const body = await context.req.json<SMSParams>();
-        const { phone, name, text } = body;
+        const { phone, name, smsMessage } = body;
 
-        if (!phone || !name || !text) {
+        if (!phone || !name || !smsMessage) {
             return context.json(
                 { success: false, message: "Missing body" },
                 400
