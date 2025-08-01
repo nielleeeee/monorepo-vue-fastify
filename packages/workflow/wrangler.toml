@@ -17,3 +17,9 @@ class_name = "TestEmailWorkflow"
 name = "test-sms-workflow"
 binding = "TEST_SMS_WORKFLOW"
 class_name = "TestSMSWorkflow"
+
+[[workflows]]
+name = "test-error-workflow"
+binding = "TEST_ERROR_WORKFLOW"
+class_name = "TestErrorWorkflow"
+
