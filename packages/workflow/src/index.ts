@@ -7,6 +7,7 @@ import { SampleWorkflowParams, EmailParams, SMSParams } from "./types";
 import { TestWorkflow } from "./workflow/sampleWorkflow";
 import { TestEmailWorkflow } from "./workflow/emailWorkflow";
 import { TestSMSWorkflow } from "./workflow/smsWorkflow";
+import { TestErrorWorkflow } from "./workflow/testErrorWorkflow";
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -27,8 +28,7 @@ app.get("/", (c) => {
 app.post("/test-workflow", authMiddleware, async (context) => {
     try {
         const body = await context.req.json<SampleWorkflowParams>();
-        const { name, email, phone } =
-            body;
+        const { name, email, phone } = body;
 
         if (!name || !email || !phone) {
             return context.json(
@@ -155,7 +155,32 @@ app.post("/test-workflow-sms", authMiddleware, async (context) => {
     }
 });
 
-export { TestWorkflow, TestEmailWorkflow, TestSMSWorkflow };
+app.post("/test-workflow-error", authMiddleware, async (context) => {
+    try {
+        const body = await context.req.json();
+
+        let workflow = context.env.TEST_ERROR_WORKFLOW;
+
+        const workflowCreate = await workflow.create({
+            id: "workflow-run-" + crypto.randomUUID(),
+            params: body,
+        });
+
+        return context.json({
+            success: true,
+            message: "Workflow SMS started",
+            id: workflowCreate.id,
+        });
+    } catch (error) {
+        console.error("error sending sms", error);
+        return context.json(
+            { success: false, message: "Failed to send sms" },
+            500
+        );
+    }
+});
+
+export { TestWorkflow, TestEmailWorkflow, TestSMSWorkflow, TestErrorWorkflow};
 
 export default {
     fetch: app.fetch,
