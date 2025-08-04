@@ -62,3 +62,10 @@ Content-Type: application/json
 token: {{token}}
 
 {}
+
+###
+# 4. Trigger the Sample Get
+# @name triggerErrorWorkflow
+GET {{hostname}}/sample-get
+Content-Type: application/json
+token: {{token}} 
