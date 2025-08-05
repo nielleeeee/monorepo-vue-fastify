@@ -11,6 +11,7 @@ declare namespace Cloudflare {
 		TEST_EMAIL_WORKFLOW: Workflow;
 		TEST_SMS_WORKFLOW: Workflow;
 		TEST_ERROR_WORKFLOW: Workflow;
+        SAMPLE_TOKEN: string;
 	}
 }
 interface Env extends Cloudflare.Env {}
