@@ -3,6 +3,8 @@ import {
     WorkflowEvent,
     WorkflowStep,
 } from "cloudflare:workers";
+import { terminateWorkflow } from "../helper/terminateWorkflow";
+import { NonRetryableError } from "cloudflare:workflows";
 
 interface Params {}
 
@@ -12,29 +14,51 @@ export class TestErrorWorkflow extends WorkflowEntrypoint<Env, Params> {
         const thisWorkflowId = event.instanceId;
 
         const first = await step.do("First step", async () => {
-            console.log("Console Log From Workflow | Step 1");
+            try {
+                console.log("Console Log From Workflow | Step 1");
 
-            const thisWorkflowInstance = await env.TEST_ERROR_WORKFLOW.get(
-                thisWorkflowId
-            );
+                console.log("It did not terminate | Step 1");
 
-            await thisWorkflowInstance.terminate();
-
-            console.log("It did not terminate | Step 1");
-            return "First step";
+                return {
+                    toSkip: true,
+                };
+            } catch (error) {
+                return {
+                    toSkip: true,
+                };
+            }
         });
 
+        if (first.toSkip) {
+            return;
+        }
+
         const second = await step.do("Second step", async () => {
-            console.log("Console Log From Workflow | Step 2");
-            return "Second step";
+           
+
+            try {
+                console.log("Console Log From Workflow | Step 2");
+                console.log("It did not terminate | Step 2");
+
+                return { toSkip: false };
+            } catch (error) {
+                return { toSkip: true };
+            }
         });
 
         const third = await step.do("Third step", async () => {
+            if (second.toSkip) {
+                return { toSkip: true };
+            }
+
             console.log("Console Log From Workflow | Step 3");
+            console.log("It did not terminate | Step 3");
             return "Third step";
         });
 
         await step.do("Final step", async () => {
+            console.log("Console Log From Workflow | Final step");
+
             return { first, second, third };
         });
     }
