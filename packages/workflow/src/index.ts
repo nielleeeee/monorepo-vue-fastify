@@ -25,6 +25,16 @@ app.get("/", (c) => {
     return c.text("Hello Hono!");
 });
 
+app.get("/sample-get", authMiddleware, async (c) => {
+    try {
+        await fetch("http://localhost:8787/");
+        console.log("Sample GET");
+        return c.text("Hello Hono!");
+    } catch (error) {
+        console.error("Sample GET Error", error);
+    }
+});
+
 app.post("/test-workflow", authMiddleware, async (context) => {
     try {
         const body = await context.req.json<SampleWorkflowParams>();
@@ -180,7 +190,55 @@ app.post("/test-workflow-error", authMiddleware, async (context) => {
     }
 });
 
-export { TestWorkflow, TestEmailWorkflow, TestSMSWorkflow, TestErrorWorkflow};
+app.delete(
+    "terminate-workflow/:workflowId",
+    authMiddleware,
+    async (context) => {
+        const { workflowId } = context.req.param();
+
+        try {
+            const workflowInstance = await context.env.TEST_ERROR_WORKFLOW.get(
+                workflowId
+            );
+
+            if (!workflowInstance) {
+                return context.json(
+                    { success: false, message: "Workflow not found" },
+                    404
+                );
+            }
+
+            const status = await workflowInstance.status();
+            console.log("Workflow status:", status);
+
+            if (
+                status.status === "terminated" ||
+                status.status === "complete"
+            ) {
+                return context.json({
+                    success: true,
+                    message: `Workflow already ${status.status}`,
+                });
+            }
+
+            await workflowInstance.terminate();
+
+            return context.json({
+                success: true,
+                message: "Workflow terminated",
+            });
+        } catch (error) {
+            console.error("error terminating workflow", error);
+
+            return context.json(
+                { success: false, message: "Failed to terminate workflow" },
+                500
+            );
+        }
+    }
+);
+
+export { TestWorkflow, TestEmailWorkflow, TestSMSWorkflow, TestErrorWorkflow };
 
 export default {
     fetch: app.fetch,
