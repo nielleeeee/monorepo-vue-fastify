@@ -23,3 +23,7 @@ name = "test-error-workflow"
 binding = "TEST_ERROR_WORKFLOW"
 class_name = "TestErrorWorkflow"
 
+[[kv_namespaces]]
+binding = "KV"
+id = "sample-kv"
+
