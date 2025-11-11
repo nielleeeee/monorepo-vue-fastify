@@ -12,10 +12,15 @@ export class TestErrorWorkflow extends WorkflowEntrypoint<Env, Params> {
     async run(event: WorkflowEvent<Params>, step: WorkflowStep) {
         const { env } = this;
         const thisWorkflowId = event.instanceId;
+        const kv = env.KV;
 
         const first = await step.do("First step", async () => {
             try {
                 console.log("Console Log From Workflow | Step 1");
+
+                const kvTest = await kv.get(["test", "key", "not", "found"]);
+
+                console.log("Test KV:", kvTest);
 
                 console.log("It did not terminate | Step 1");
 
@@ -34,8 +39,6 @@ export class TestErrorWorkflow extends WorkflowEntrypoint<Env, Params> {
         }
 
         const second = await step.do("Second step", async () => {
-           
-
             try {
                 console.log("Console Log From Workflow | Step 2");
                 console.log("It did not terminate | Step 2");
