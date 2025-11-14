@@ -8,7 +8,7 @@
     "dev:workflow": "pnpm --filter workflow dev"
   },
   "devDependencies": {
-    "typescript": "~5.8.0"
+    "typescript": "~5.8.3"
   },
   "dependencies": {
     "uuid": "^11.1.0"
