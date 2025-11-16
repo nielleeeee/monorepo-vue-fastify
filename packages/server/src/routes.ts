@@ -1,6 +1,7 @@
 import { router, publicProcedure } from "./trpc";
 import { z } from "zod";
-import { db } from "./db";
+import { db } from "./config/db";
+import { bigQueryClient } from "./config/bigquery";
 
 interface StoreItem {
     id: string;
@@ -13,13 +14,11 @@ export const appRouter = router({
         return "Hello from tRPC!";
     }),
 
-    greet: publicProcedure
-        .input(z.object({ name: z.string() }))
-        .query(({ input }) => {
-            return {
-                greeting: `Greetings, ${input.name}!`,
-            };
-        }),
+    greet: publicProcedure.input(z.object({ name: z.string() })).query(({ input }) => {
+        return {
+            greeting: `Greetings, ${input.name}!`,
+        };
+    }),
 
     getStoreItems: publicProcedure
         .input(
@@ -32,29 +31,15 @@ export const appRouter = router({
             })
         )
         .query(async ({ input }) => {
-            const {
-                limit = 10,
-                cursor,
-                search,
-                sortBy = "name",
-                sortOrder = "asc",
-            } = input;
-            let query = db
-                .collection("storeItem")
-                .orderBy(sortBy, sortOrder)
-                .limit(limit);
+            const { limit = 10, cursor, search, sortBy = "name", sortOrder = "asc" } = input;
+            let query = db.collection("storeItem").orderBy(sortBy, sortOrder).limit(limit);
 
             if (search && sortBy === "name") {
-                query = query
-                    .where("name", ">=", search)
-                    .where("name", "<=", search + "\uf8ff");
+                query = query.where("name", ">=", search).where("name", "<=", search + "\uf8ff");
             }
 
             if (cursor) {
-                const cursorDoc = await db
-                    .collection("storeItem")
-                    .doc(cursor)
-                    .get();
+                const cursorDoc = await db.collection("storeItem").doc(cursor).get();
 
                 if (cursorDoc.exists) {
                     query = query.startAfter(cursorDoc);
@@ -111,9 +96,7 @@ export const appRouter = router({
         }),
 
     updateStoreItem: publicProcedure
-        .input(
-            z.object({ id: z.string(), name: z.string(), price: z.number() })
-        )
+        .input(z.object({ id: z.string(), name: z.string(), price: z.number() }))
         .mutation(async ({ input }) => {
             const newItem = {
                 name: input.name,
@@ -134,6 +117,33 @@ export const appRouter = router({
 
             return { success: true, id: input.id };
         }),
+
+    sampleBigQuery: publicProcedure.query(async () => {
+        const sqlQuery = `SELECT
+        CONCAT(
+          'https://stackoverflow.com/questions/',
+          CAST(id as STRING)) as url,
+        view_count
+        FROM \`bigquery-public-data.stackoverflow.posts_questions\`
+        WHERE tags like '%google-bigquery%'
+        ORDER BY view_count DESC
+        LIMIT 10`;
+
+        const options = {
+            query: sqlQuery,
+            // location: "AU",
+        };
+
+        const [rows] = await bigQueryClient.query(options);
+
+        console.log("Query Results:");
+
+        rows.forEach((row) => {
+            const url = row["url"];
+            const viewCount = row["view_count"];
+            console.log(`url: ${url}, ${viewCount} views`);
+        });
+    }),
 });
 
 export type AppRouter = typeof appRouter;
