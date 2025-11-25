@@ -69,3 +69,19 @@ token: {{token}}
 GET {{hostname}}/sample-get
 Content-Type: application/json
 token: {{token}} 
+
+###
+# 5. Trigger the Queue workflow
+# @name triggerQueueWorkflow
+POST {{hostname}}/test-workflow-queue
+Content-Type: application/json
+token: {{token}}
+
+{
+  "id": "queue-run-sample_id",
+  "data": {
+    "name": "Sample Name",
+    "email": "jandnllplz@gmail.com",
+    "phone": "+639776996964"
+  }
+}
