@@ -6,7 +6,7 @@ import {
 import { EmailParams } from "../types";
 import { sendEmail } from "../helper/email";
 
-export class TestEmailWorkflow extends WorkflowEntrypoint<Env, EmailParams> {
+export class TestEmailWorkflow extends WorkflowEntrypoint<CloudflareBindings, EmailParams> {
     async run(event: WorkflowEvent<EmailParams>, step: WorkflowStep) {
         const { env } = this;
         const { name, email, subject, emailMessage } = event.payload;

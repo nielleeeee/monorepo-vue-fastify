@@ -1,12 +1,8 @@
-import {
-    WorkflowEntrypoint,
-    WorkflowEvent,
-    WorkflowStep,
-} from "cloudflare:workers";
+import { WorkflowEntrypoint, WorkflowEvent, WorkflowStep } from "cloudflare:workers";
 import { SMSParams } from "../types";
 import { sendSMS } from "../helper/sms";
 
-export class TestSMSWorkflow extends WorkflowEntrypoint<Env, SMSParams> {
+export class TestSMSWorkflow extends WorkflowEntrypoint<CloudflareBindings, SMSParams> {
     async run(event: WorkflowEvent<SMSParams>, step: WorkflowStep) {
         const { env } = this;
         const { name, phone, smsMessage } = event.payload;

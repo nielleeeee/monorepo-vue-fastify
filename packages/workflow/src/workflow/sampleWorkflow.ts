@@ -1,20 +1,12 @@
-import {
-    WorkflowEntrypoint,
-    WorkflowEvent,
-    WorkflowStep,
-} from "cloudflare:workers";
+import { WorkflowEntrypoint, WorkflowEvent, WorkflowStep } from "cloudflare:workers";
 import { sendEmail } from "../helper/email";
 import { sendSMS } from "../helper/sms";
 import { SampleWorkflowParams } from "../types";
 
-export class TestWorkflow extends WorkflowEntrypoint<
-    Env,
-    SampleWorkflowParams
-> {
+export class TestWorkflow extends WorkflowEntrypoint<CloudflareBindings, SampleWorkflowParams> {
     async run(event: WorkflowEvent<SampleWorkflowParams>, step: WorkflowStep) {
         const { env } = this;
-        const { name, email, phone, emailMessage, smsMessage, subject } =
-            event.payload;
+        const { name, email, phone, emailMessage, smsMessage, subject } = event.payload;
 
         if (!name || !email || !phone) {
             throw new Error("Missing required params");
@@ -32,14 +24,13 @@ export class TestWorkflow extends WorkflowEntrypoint<
             name,
             smsMessage: smsMessage ?? "This is the SMS body",
         };
-        
 
         const first = await step.do("First step", async () => {
             console.log("Console Log From Workflow | Step 1 | Starting");
 
             return "First step";
         });
-        
+
         const second = await step.do("Second step", async () => {
             console.log("Console Log From Workflow | Step 2 | Sending Email");
 
