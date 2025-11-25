@@ -27,3 +27,24 @@ class_name = "TestErrorWorkflow"
 binding = "KV"
 id = "sample-kv"
 
+[[queues.producers]]
+binding = "SAMPLE_QUEUE"
+queue = "sample-queue"
+
+[[queues.producers]]
+binding = "SAMPLE_QUEUE_2"
+queue = "sample-queue-2"
+
+[[queues.consumers]]
+queue = "sample-queue"
+max_batch_size = 10
+max_batch_timeout = 10
+max_retries = 3
+dead_letter_queue = "sample-dlq"
+
+[[queues.consumers]]
+queue = "sample-queue-2"
+max_batch_size = 10
+max_batch_timeout = 10
+max_retries = 3
+dead_letter_queue = "sample-dlq-2"
