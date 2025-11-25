@@ -7,11 +7,20 @@ const startWorkflowFormState = reactive({
   name: '',
   email: '',
   subject: '',
-  text: '',
+  emailMessage: '',
 })
 
 const handleStartWorkflow = async () => {
   isLoading.value = true
+
+  const body = {
+    name: startWorkflowFormState.name,
+    email: startWorkflowFormState.email,
+    subject: startWorkflowFormState.subject,
+    emailMessage: startWorkflowFormState.emailMessage,
+  }
+
+  console.log('Email Workflow Body: ', body)
 
   try {
     const emailWorkflow = await fetch('http://localhost:8787/test-workflow-email', {
@@ -20,12 +29,7 @@ const handleStartWorkflow = async () => {
         'Content-Type': 'application/json',
         token: SAMPLE_TOKEN,
       },
-      body: JSON.stringify({
-        name: startWorkflowFormState.name,
-        email: startWorkflowFormState.email,
-        subject: startWorkflowFormState.subject,
-        text: startWorkflowFormState.text,
-      }),
+      body: JSON.stringify(body),
     })
 
     if (!emailWorkflow.ok) {
@@ -46,7 +50,7 @@ const clearForm = () => {
   startWorkflowFormState.name = ''
   startWorkflowFormState.email = ''
   startWorkflowFormState.subject = ''
-  startWorkflowFormState.text = ''
+  startWorkflowFormState.emailMessage = ''
 }
 </script>
 
@@ -69,8 +73,12 @@ const clearForm = () => {
       </div>
 
       <div class="form-input">
-        <label for="text">Email Body</label>
-        <textarea id="text" name="text" v-model="startWorkflowFormState.text" />
+        <label for="emailMessage">Email Body</label>
+        <textarea
+          id="emailMessage"
+          name="emailMessage"
+          v-model="startWorkflowFormState.emailMessage"
+        />
       </div>
 
       <button type="submit">Start Workflow</button>
