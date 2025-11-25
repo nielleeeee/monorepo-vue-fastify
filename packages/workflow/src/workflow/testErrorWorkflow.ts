@@ -1,15 +1,7 @@
-import {
-    WorkflowEntrypoint,
-    WorkflowEvent,
-    WorkflowStep,
-} from "cloudflare:workers";
-import { terminateWorkflow } from "../helper/terminateWorkflow";
-import { NonRetryableError } from "cloudflare:workflows";
+import { WorkflowEntrypoint, WorkflowEvent, WorkflowStep } from "cloudflare:workers";
 
-interface Params {}
-
-export class TestErrorWorkflow extends WorkflowEntrypoint<Env, Params> {
-    async run(event: WorkflowEvent<Params>, step: WorkflowStep) {
+export class TestErrorWorkflow extends WorkflowEntrypoint<CloudflareBindings, unknown> {
+    async run(event: WorkflowEvent<unknown>, step: WorkflowStep) {
         const { env } = this;
         const thisWorkflowId = event.instanceId;
         const kv = env.KV;
