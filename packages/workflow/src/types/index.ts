@@ -1,6 +1,5 @@
 export interface Params {
     name: string;
-    
 }
 
 export interface WorkflowResponse {
@@ -30,3 +29,13 @@ export interface SMSParams {
 }
 
 export interface SampleWorkflowParams extends EmailParams, SMSParams {}
+
+export interface QueueParams {
+    id: string;
+    data: QueueData;
+}
+export interface QueueData {
+    name: string;
+    email: string;
+    phone: string;
+}
