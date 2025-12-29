@@ -3,7 +3,7 @@ import { EmailParams } from "../types";
 
 const sendEmail = async (
     { email, name, subject, emailMessage }: EmailParams,
-    env: Env
+    env: CloudflareBindings
 ) => {
     const resend = new Resend(env.RESEND_API_KEY);
 
