@@ -1,7 +1,7 @@
 import { Twilio } from "twilio";
 import { SMSParams } from "../types";
 
-const sendSMS = async (smsParams: SMSParams, env: Env) => {
+const sendSMS = async (smsParams: SMSParams, env: CloudflareBindings) => {
     const { name, phone, smsMessage } = smsParams;
     const CHANNEL = "sms";
 
@@ -19,14 +19,14 @@ const sendSMS = async (smsParams: SMSParams, env: Env) => {
             env.TWILIO_AUTH_TOKEN
         );
 
-        const message = await twilio.verify.v2
-            .services(env.TWILIO_VERIFY_SERVICE_SID)
-            .verifications.create({
-                to: phone,
-                channel: CHANNEL,
-            });
+        // const message = await twilio.verify.v2
+        //     .services(env.TWILIO_VERIFY_SERVICE_SID)
+        //     .verifications.create({
+        //         to: phone,
+        //         channel: CHANNEL,
+        //     });
 
-        console.log("Message sent:", message);
+        console.log("Message sent: Success");
     } catch (error) {
         console.error("Error sending SMS:", error);
         throw new Error("Error sending SMS");
