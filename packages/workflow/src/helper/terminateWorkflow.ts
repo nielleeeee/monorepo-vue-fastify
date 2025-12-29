@@ -1,4 +1,4 @@
-export const terminateWorkflow = async (workflowId: string, env: Env) => {
+export const terminateWorkflow = async (workflowId: string, env: CloudflareBindings) => {
     try {
         const res = await fetch(
             `http://localhost:8787/terminate-workflow/${workflowId}`,
