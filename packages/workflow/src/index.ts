@@ -1,6 +1,5 @@
 import { Hono } from "hono";
 import { logger } from "hono/logger";
-import { poweredBy } from "hono/powered-by";
 import { cors } from "hono/cors";
 import { authMiddleware } from "./middleware";
 import { SampleWorkflowParams, EmailParams, SMSParams, QueueParams } from "./types";
@@ -9,11 +8,13 @@ import { TestEmailWorkflow } from "./workflow/emailWorkflow";
 import { TestSMSWorkflow } from "./workflow/smsWorkflow";
 import { TestErrorWorkflow } from "./workflow/testErrorWorkflow";
 import { queue } from "./queue";
+import { router } from "./orpc";
+import { onError } from "@orpc/server";
+import { RPCHandler } from "@orpc/server/fetch";
 
 const app = new Hono<{ Bindings: CloudflareBindings }>();
 
 app.use(logger());
-app.use(poweredBy());
 
 app.use(
     "*",
@@ -225,6 +226,30 @@ app.post("/test-workflow-queue", authMiddleware, async (context) => {
     } catch (error) {
         console.error("error sending queue", error);
     }
+});
+
+const handler = new RPCHandler(router, {
+    interceptors: [
+        onError((error) => {
+            console.error("[API] ORPC Error:", (error as any).message);
+        }),
+    ],
+});
+
+app.use("/rpc/*", async (c, next) => {
+    const { matched, response } = await handler.handle(c.req.raw, {
+        prefix: "/rpc",
+        context: {
+            headers: c.req.raw.headers,
+            env: c.env,
+        },
+    });
+
+    if (matched) {
+        return c.newResponse(response.body, response);
+    }
+
+    await next();
 });
 
 // Export the workflows
