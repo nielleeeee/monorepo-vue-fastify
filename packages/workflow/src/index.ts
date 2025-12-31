@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { logger } from "hono/logger";
 import { cors } from "hono/cors";
-import { authMiddleware } from "./middleware";
+import { authMiddleware } from "./middleware/middleware";
 import { SampleWorkflowParams, EmailParams, SMSParams, QueueParams } from "./types";
 import { TestWorkflow } from "./workflow/sampleWorkflow";
 import { TestEmailWorkflow } from "./workflow/emailWorkflow";
