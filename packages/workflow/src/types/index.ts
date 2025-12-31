@@ -39,3 +39,9 @@ export interface QueueData {
     email: string;
     phone: string;
 }
+
+export interface AppContext<TEnv = CloudflareBindings> {
+    env: TEnv;
+    headers: Headers;
+}
+
