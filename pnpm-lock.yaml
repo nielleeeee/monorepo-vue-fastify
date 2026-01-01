@@ -94,6 +94,12 @@ importers:
       '@google-cloud/bigquery':
         specifier: ^8.1.1
         version: 8.1.1
+      '@orpc/client':
+        specifier: ^1.13.0
+        version: 1.13.0(@opentelemetry/api@1.9.0)
+      '@orpc/server':
+        specifier: ^1.13.0
+        version: 1.13.0(@opentelemetry/api@1.9.0)(fastify@5.4.0)
       '@trpc/server':
         specifier: ^11.4.3
         version: 11.4.3(typescript@5.8.3)
@@ -136,7 +142,7 @@ importers:
         version: 1.13.0(@opentelemetry/api@1.9.0)
       '@orpc/server':
         specifier: ^1.13.0
-        version: 1.13.0(@opentelemetry/api@1.9.0)
+        version: 1.13.0(@opentelemetry/api@1.9.0)(fastify@5.4.0)
       arktype:
         specifier: ^2.1.29
         version: 2.1.29
@@ -4656,7 +4662,7 @@ snapshots:
 
   '@orpc/interop@1.13.0': {}
 
-  '@orpc/server@1.13.0(@opentelemetry/api@1.9.0)':
+  '@orpc/server@1.13.0(@opentelemetry/api@1.9.0)(fastify@5.4.0)':
     dependencies:
       '@orpc/client': 1.13.0(@opentelemetry/api@1.9.0)
       '@orpc/contract': 1.13.0(@opentelemetry/api@1.9.0)
@@ -4664,7 +4670,7 @@ snapshots:
       '@orpc/shared': 1.13.0(@opentelemetry/api@1.9.0)
       '@orpc/standard-server': 1.13.0(@opentelemetry/api@1.9.0)
       '@orpc/standard-server-aws-lambda': 1.13.0(@opentelemetry/api@1.9.0)
-      '@orpc/standard-server-fastify': 1.13.0(@opentelemetry/api@1.9.0)
+      '@orpc/standard-server-fastify': 1.13.0(@opentelemetry/api@1.9.0)(fastify@5.4.0)
       '@orpc/standard-server-fetch': 1.13.0(@opentelemetry/api@1.9.0)
       '@orpc/standard-server-node': 1.13.0(@opentelemetry/api@1.9.0)
       '@orpc/standard-server-peer': 1.13.0(@opentelemetry/api@1.9.0)
@@ -4689,11 +4695,13 @@ snapshots:
     transitivePeerDependencies:
       - '@opentelemetry/api'
 
-  '@orpc/standard-server-fastify@1.13.0(@opentelemetry/api@1.9.0)':
+  '@orpc/standard-server-fastify@1.13.0(@opentelemetry/api@1.9.0)(fastify@5.4.0)':
     dependencies:
       '@orpc/shared': 1.13.0(@opentelemetry/api@1.9.0)
       '@orpc/standard-server': 1.13.0(@opentelemetry/api@1.9.0)
       '@orpc/standard-server-node': 1.13.0(@opentelemetry/api@1.9.0)
+    optionalDependencies:
+      fastify: 5.4.0
     transitivePeerDependencies:
       - '@opentelemetry/api'
 
