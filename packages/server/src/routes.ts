@@ -2,6 +2,7 @@ import { router, publicProcedure } from "./trpc";
 import { z } from "zod";
 import { db } from "./config/db";
 import { bigQueryClient } from "./config/bigquery";
+import { workflowClient } from "./orpc/client";
 
 interface StoreItem {
     id: string;
@@ -143,6 +144,102 @@ export const appRouter = router({
             const viewCount = row["view_count"];
             console.log(`url: ${url}, ${viewCount} views`);
         });
+    }),
+
+    workflow: router({
+        test: publicProcedure
+            .input(
+                z.object({
+                    name: z.string(),
+                    email: z.string(),
+                    phone: z.string(),
+                    emailMessage: z.string().optional(),
+                    smsMessage: z.string().optional(),
+                    subject: z.string().optional(),
+                })
+            )
+            .mutation(async ({ input }) => {
+                const client = workflowClient();
+                return await client.workflow.test({
+                    name: input.name,
+                    email: input.email,
+                    phone: input.phone,
+                    emailMessage: input.emailMessage,
+                    smsMessage: input.smsMessage,
+                    subject: input.subject,
+                });
+            }),
+
+        getStatus: publicProcedure.input(z.object({ id: z.string() })).query(async ({ input }) => {
+            const client = workflowClient();
+            return await client.workflow.getStatus(input);
+        }),
+
+        testEmail: publicProcedure
+            .input(
+                z.object({
+                    email: z.string(),
+                    name: z.string(),
+                    subject: z.string().optional(),
+                    emailMessage: z.string().optional(),
+                })
+            )
+            .mutation(async ({ input }) => {
+                const client = workflowClient();
+                return await client.workflow.testEmail({
+                    email: input.email,
+                    name: input.name,
+                    subject: input.subject,
+                    emailMessage: input.emailMessage,
+                });
+            }),
+
+        testSMS: publicProcedure
+            .input(
+                z.object({
+                    phone: z.string(),
+                    name: z.string(),
+                    smsMessage: z.string().optional(),
+                })
+            )
+            .mutation(async ({ input }) => {
+                const client = workflowClient();
+                return await client.workflow.testSMS({
+                    phone: input.phone,
+                    name: input.name,
+                    smsMessage: input.smsMessage,
+                });
+            }),
+
+        testError: publicProcedure.input(z.unknown()).mutation(async ({ input }) => {
+            const client = workflowClient();
+            return await client.workflow.testError(input);
+        }),
+
+        terminate: publicProcedure
+            .input(z.object({ workflowId: z.string() }))
+            .mutation(async ({ input }) => {
+                const client = workflowClient();
+                return await client.workflow.terminate(input);
+            }),
+    }),
+
+    queue: router({
+        send: publicProcedure
+            .input(
+                z.object({
+                    id: z.string(),
+                    data: z.object({
+                        name: z.string(),
+                        email: z.string(),
+                        phone: z.string(),
+                    }),
+                })
+            )
+            .mutation(async ({ input }) => {
+                const client = workflowClient();
+                return await client.queue.send(input);
+            }),
     }),
 });
 
