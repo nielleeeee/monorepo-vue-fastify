@@ -1,6 +1,7 @@
 import Fastify from "fastify";
 import cors from "@fastify/cors";
-import { fastifyTRPCPlugin } from "@trpc/server/adapters/fastify";
+import { RPCHandler } from "@orpc/server/fastify";
+import { onError } from "@orpc/server";
 import { appRouter } from "./routes";
 
 const server = Fastify({
@@ -11,9 +12,23 @@ await server.register(cors, {
     origin: "*",
 });
 
-await server.register(fastifyTRPCPlugin, {
-    prefix: "/trpc",
-    trpcOptions: { router: appRouter },
+const handler = new RPCHandler(appRouter, {
+    interceptors: [
+        onError((error) => {
+            console.error("[Server] ORPC Error:", (error as any).message);
+        }),
+    ],
+});
+
+server.all("/api/*", async (req, reply) => {
+    const { matched } = await handler.handle(req, reply, {
+        prefix: "/api",
+        context: {},
+    });
+
+    if (!matched) {
+        reply.status(404).send("Not found");
+    }
 });
 
 const start = async () => {
