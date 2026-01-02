@@ -2,7 +2,7 @@
 import { ref, reactive } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useStoreItem } from '@/stores/storeItem'
-import { trpc } from '@/trpc'
+import { serverClient } from '@/orpc/client'
 
 const isLoading = ref(false)
 const store = useStoreItem()
@@ -21,7 +21,8 @@ const handleCreateItem = async () => {
     console.log('Item to be added: ', formState)
 
     // Save Item to DB
-    const result = await trpc.createStoreItem.mutate({
+    const client = serverClient()
+    const result = await client.createStoreItem({
       name: formState.name,
       price: formState.price,
     })
@@ -31,7 +32,7 @@ const handleCreateItem = async () => {
       name: result.name,
       price: result.price,
     })
-    
+
     console.log('Store Item: ', storeItem)
   } catch (error) {
     console.error('Error creating item:', error)
