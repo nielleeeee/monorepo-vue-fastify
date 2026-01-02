@@ -1,5 +1,5 @@
-import { router, publicProcedure } from "./trpc";
-import { z } from "zod";
+import { router, publicProcedure } from "./orpc";
+import { type } from "arktype";
 import { db } from "./config/db";
 import { bigQueryClient } from "./config/bigquery";
 import { workflowClient } from "./orpc/client";
@@ -11,11 +11,11 @@ interface StoreItem {
 }
 
 export const appRouter = router({
-    hello: publicProcedure.query(() => {
-        return "Hello from tRPC!";
+    hello: publicProcedure.handler(() => {
+        return "Hello from oRPC!";
     }),
 
-    greet: publicProcedure.input(z.object({ name: z.string() })).query(({ input }) => {
+    greet: publicProcedure.input(type({ name: "string" })).handler(({ input }) => {
         return {
             greeting: `Greetings, ${input.name}!`,
         };
@@ -23,15 +23,15 @@ export const appRouter = router({
 
     getStoreItems: publicProcedure
         .input(
-            z.object({
-                limit: z.number().optional(),
-                cursor: z.string().optional(),
-                search: z.string().optional(),
-                sortBy: z.enum(["name", "price"]).optional(),
-                sortOrder: z.enum(["asc", "desc"]).optional(),
+            type({
+                "limit?": "number",
+                "cursor?": "string",
+                "search?": "string",
+                "sortBy?": "'name' | 'price'",
+                "sortOrder?": "'asc' | 'desc'",
             })
         )
-        .query(async ({ input }) => {
+        .handler(async ({ input }) => {
             const { limit = 10, cursor, search, sortBy = "name", sortOrder = "asc" } = input;
             let query = db.collection("storeItem").orderBy(sortBy, sortOrder).limit(limit);
 
@@ -63,29 +63,27 @@ export const appRouter = router({
             return { items, nextCursor };
         }),
 
-    getStoreItemById: publicProcedure
-        .input(z.object({ id: z.string() }))
-        .query(async ({ input }) => {
-            console.log("getStoreItemById", input);
+    getStoreItemById: publicProcedure.input(type({ id: "string" })).handler(async ({ input }) => {
+        console.log("getStoreItemById", input);
 
-            const docRef = db.collection("storeItem").doc(input.id);
+        const docRef = db.collection("storeItem").doc(input.id);
 
-            const doc = await docRef.get();
+        const doc = await docRef.get();
 
-            if (!doc.exists) {
-                console.error("Error fetching item Data:", doc);
-                console.error("Error fetching item ID:", doc.id);
-                throw new Error("Item not found");
-            }
+        if (!doc.exists) {
+            console.error("Error fetching item Data:", doc);
+            console.error("Error fetching item ID:", doc.id);
+            throw new Error("Item not found");
+        }
 
-            const resItem = { id: doc.id, ...doc.data() } as StoreItem;
+        const resItem = { id: doc.id, ...doc.data() } as StoreItem;
 
-            return resItem;
-        }),
+        return resItem;
+    }),
 
     createStoreItem: publicProcedure
-        .input(z.object({ name: z.string(), price: z.number() }))
-        .mutation(async ({ input }) => {
+        .input(type({ name: "string", price: "number" }))
+        .handler(async ({ input }) => {
             const newItem = {
                 name: input.name,
                 price: input.price,
@@ -97,8 +95,8 @@ export const appRouter = router({
         }),
 
     updateStoreItem: publicProcedure
-        .input(z.object({ id: z.string(), name: z.string(), price: z.number() }))
-        .mutation(async ({ input }) => {
+        .input(type({ id: "string", name: "string", price: "number" }))
+        .handler(async ({ input }) => {
             const newItem = {
                 name: input.name,
                 price: input.price,
@@ -111,15 +109,13 @@ export const appRouter = router({
             return { id: docRef.id, ...newItem } as StoreItem;
         }),
 
-    deleteStoreItem: publicProcedure
-        .input(z.object({ id: z.string() }))
-        .mutation(async ({ input }) => {
-            await db.collection("storeItem").doc(input.id).delete();
+    deleteStoreItem: publicProcedure.input(type({ id: "string" })).handler(async ({ input }) => {
+        await db.collection("storeItem").doc(input.id).delete();
 
-            return { success: true, id: input.id };
-        }),
+        return { success: true, id: input.id };
+    }),
 
-    sampleBigQuery: publicProcedure.query(async () => {
+    sampleBigQuery: publicProcedure.handler(async () => {
         const sqlQuery = `SELECT
         CONCAT(
           'https://stackoverflow.com/questions/',
@@ -149,16 +145,16 @@ export const appRouter = router({
     workflow: router({
         test: publicProcedure
             .input(
-                z.object({
-                    name: z.string(),
-                    email: z.string(),
-                    phone: z.string(),
-                    emailMessage: z.string().optional(),
-                    smsMessage: z.string().optional(),
-                    subject: z.string().optional(),
+                type({
+                    name: "string",
+                    email: "string",
+                    phone: "string",
+                    "emailMessage?": "string",
+                    "smsMessage?": "string",
+                    "subject?": "string",
                 })
             )
-            .mutation(async ({ input }) => {
+            .handler(async ({ input }) => {
                 const client = workflowClient();
                 return await client.workflow.test({
                     name: input.name,
@@ -170,21 +166,21 @@ export const appRouter = router({
                 });
             }),
 
-        getStatus: publicProcedure.input(z.object({ id: z.string() })).query(async ({ input }) => {
+        getStatus: publicProcedure.input(type({ id: "string" })).handler(async ({ input }) => {
             const client = workflowClient();
             return await client.workflow.getStatus(input);
         }),
 
         testEmail: publicProcedure
             .input(
-                z.object({
-                    email: z.string(),
-                    name: z.string(),
-                    subject: z.string().optional(),
-                    emailMessage: z.string().optional(),
+                type({
+                    email: "string",
+                    name: "string",
+                    "subject?": "string",
+                    "emailMessage?": "string",
                 })
             )
-            .mutation(async ({ input }) => {
+            .handler(async ({ input }) => {
                 const client = workflowClient();
                 return await client.workflow.testEmail({
                     email: input.email,
@@ -196,13 +192,13 @@ export const appRouter = router({
 
         testSMS: publicProcedure
             .input(
-                z.object({
-                    phone: z.string(),
-                    name: z.string(),
-                    smsMessage: z.string().optional(),
+                type({
+                    phone: "string",
+                    name: "string",
+                    "smsMessage?": "string",
                 })
             )
-            .mutation(async ({ input }) => {
+            .handler(async ({ input }) => {
                 const client = workflowClient();
                 return await client.workflow.testSMS({
                     phone: input.phone,
@@ -211,14 +207,14 @@ export const appRouter = router({
                 });
             }),
 
-        testError: publicProcedure.input(z.unknown()).mutation(async ({ input }) => {
+        testError: publicProcedure.input(type("unknown")).handler(async ({ input }) => {
             const client = workflowClient();
             return await client.workflow.testError(input);
         }),
 
         terminate: publicProcedure
-            .input(z.object({ workflowId: z.string() }))
-            .mutation(async ({ input }) => {
+            .input(type({ workflowId: "string" }))
+            .handler(async ({ input }) => {
                 const client = workflowClient();
                 return await client.workflow.terminate(input);
             }),
@@ -227,16 +223,16 @@ export const appRouter = router({
     queue: router({
         send: publicProcedure
             .input(
-                z.object({
-                    id: z.string(),
-                    data: z.object({
-                        name: z.string(),
-                        email: z.string(),
-                        phone: z.string(),
-                    }),
+                type({
+                    id: "string",
+                    data: {
+                        name: "string",
+                        email: "string",
+                        phone: "string",
+                    },
                 })
             )
-            .mutation(async ({ input }) => {
+            .handler(async ({ input }) => {
                 const client = workflowClient();
                 return await client.queue.send(input);
             }),
