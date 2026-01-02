@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
-import { trpc } from '@/trpc'
+import { serverClient } from '@/orpc/client'
 import type { Item } from '@/types/itemType'
 
 import StoreCard from '@/components/StoreCard.vue'
@@ -13,7 +13,8 @@ const sampleFetchItems = async () => {
   isLoading.value = true
 
   try {
-    const items = await trpc.getStoreItems.query({})
+    const client = serverClient()
+    const items = await client.getStoreItems({})
 
     console.log('Fetched items:', items)
 
