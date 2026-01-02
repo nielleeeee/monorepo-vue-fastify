@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { reactive, computed, watch, ref } from 'vue'
+import { reactive, watch, ref } from 'vue'
 import { useStoreItem } from '@/stores/storeItem'
 import BaseModal from '@/components/BaseModal.vue'
-import { trpc } from '@/trpc'
+import { serverClient } from '@/orpc/client'
 import { useRouter } from 'vue-router'
 
 import type { Item } from '@/types/itemType'
@@ -28,7 +28,8 @@ const fetchItem = async () => {
   isLoading.value = true
 
   try {
-    const item = await trpc.getStoreItemById.query({ id: props.id })
+    const client = serverClient()
+    const item = await client.getStoreItemById({ id: props.id })
 
     return item
   } catch (error) {
@@ -63,7 +64,8 @@ const handleSave = async (): Promise<void> => {
       price: formState.price,
     })
 
-    const result = await trpc.updateStoreItem.mutate({
+    const client = serverClient()
+    const result = await client.updateStoreItem({
       id: props.id,
       name: formState.name,
       price: formState.price,
@@ -86,7 +88,8 @@ const handleDelete = async (): Promise<void> => {
   try {
     deleteStoreItem(itemData.value)
 
-    const result = await trpc.deleteStoreItem.mutate({ id: props.id })
+    const client = serverClient()
+    const result = await client.deleteStoreItem({ id: props.id })
 
     console.log('Item deleted:', result)
   } catch (error) {
