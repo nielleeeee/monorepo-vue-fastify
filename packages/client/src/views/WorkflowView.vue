@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { serverClient } from '@/orpc/client'
 import { ref, reactive } from 'vue'
 
 const SAMPLE_TOKEN = 'sample-token'
@@ -17,22 +18,14 @@ const handleStartWorkflow = async () => {
   isLoading.value = true
 
   try {
-    const workflowCreateResponse = await fetch('http://localhost:8787/test-workflow', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        token: SAMPLE_TOKEN,
-      },
-      body: JSON.stringify(startWorkflowFormState),
+    const client = serverClient()
+    const workflowCreateResponse = await client.workflow.test({
+      name: startWorkflowFormState.name,
+      email: startWorkflowFormState.email,
+      phone: startWorkflowFormState.phone,
     })
 
-    if (!workflowCreateResponse.ok) {
-      throw new Error('Failed to start workflow')
-    }
-
-    const workflowCreateResponseData = await workflowCreateResponse.json()
-
-    checkWorkflowFormState.id = workflowCreateResponseData.id as string
+    checkWorkflowFormState.id = workflowCreateResponse.id
   } catch (error) {
     console.error('Error starting workflow:', error)
   }
