@@ -1,7 +1,7 @@
 <script lang="ts" setup>
+import { serverClient } from '@/orpc/client'
 import { ref, reactive } from 'vue'
 
-const SAMPLE_TOKEN = 'sample-token'
 const isLoading = ref(false)
 const startWorkflowFormState = reactive({
   name: '',
@@ -23,22 +23,16 @@ const handleStartWorkflow = async () => {
   console.log('Email Workflow Body: ', body)
 
   try {
-    const emailWorkflow = await fetch('http://localhost:8787/test-workflow-email', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        token: SAMPLE_TOKEN,
-      },
-      body: JSON.stringify(body),
+    const client = serverClient()
+
+    const emailWorkflowResponse = await client.workflow.testEmail({
+      email: startWorkflowFormState.email,
+      name: startWorkflowFormState.name,
+      subject: startWorkflowFormState.subject,
+      emailMessage: startWorkflowFormState.emailMessage,
     })
 
-    if (!emailWorkflow.ok) {
-      throw new Error('Failed to start workflow')
-    }
-
-    const emailWorkflowResponseData = await emailWorkflow.json()
-
-    console.log('Email Workflow Start Response: ', emailWorkflowResponseData)
+    console.log('Email Workflow Start Response: ', emailWorkflowResponse)
   } catch (error) {
     console.error('Error starting workflow:', error)
   } finally {
