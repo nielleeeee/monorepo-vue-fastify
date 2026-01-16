@@ -22,7 +22,7 @@ const handleCreateItem = async () => {
 
     // Save Item to DB
     const client = serverClient()
-    const result = await client.createStoreItem({
+    const result = await client.store.createStoreItem({
       name: formState.name,
       price: formState.price,
     })
