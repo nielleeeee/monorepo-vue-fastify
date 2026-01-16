@@ -29,7 +29,7 @@ const fetchItem = async () => {
 
   try {
     const client = serverClient()
-    const item = await client.getStoreItemById({ id: props.id })
+    const item = await client.store.getStoreItemById({ id: props.id })
 
     return item
   } catch (error) {
@@ -65,7 +65,7 @@ const handleSave = async (): Promise<void> => {
     })
 
     const client = serverClient()
-    const result = await client.updateStoreItem({
+    const result = await client.store.updateStoreItem({
       id: props.id,
       name: formState.name,
       price: formState.price,
@@ -89,7 +89,7 @@ const handleDelete = async (): Promise<void> => {
     deleteStoreItem(itemData.value)
 
     const client = serverClient()
-    const result = await client.deleteStoreItem({ id: props.id })
+    const result = await client.store.deleteStoreItem({ id: props.id })
 
     console.log('Item deleted:', result)
   } catch (error) {
