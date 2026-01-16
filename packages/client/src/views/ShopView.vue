@@ -14,7 +14,7 @@ const sampleFetchItems = async () => {
 
   try {
     const client = serverClient()
-    const items = await client.getStoreItems({})
+    const items = await client.store.getStoreItems({})
 
     console.log('Fetched items:', items)
 
