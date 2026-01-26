@@ -21,4 +21,3 @@ export const queueRouter = {
 };
 
 export type QueueRouter = typeof queueRouter;
-
