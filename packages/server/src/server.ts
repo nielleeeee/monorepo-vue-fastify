@@ -2,7 +2,7 @@ import Fastify from "fastify";
 import cors from "@fastify/cors";
 import { RPCHandler } from "@orpc/server/fastify";
 import { onError } from "@orpc/server";
-import { appRouter } from "./routes";
+import { router as appRouter } from "./orpc";
 
 const server = Fastify({
     logger: true,
